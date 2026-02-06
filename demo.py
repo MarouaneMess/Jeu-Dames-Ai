@@ -5,7 +5,6 @@ import sys
 
 print("="*60)
 print("VÉRIFICATION DU PROJET - JEU DE DAMES")
-print("Architecture Professionnelle v2.0")
 print("="*60)
 
 # 1. Vérifier les imports

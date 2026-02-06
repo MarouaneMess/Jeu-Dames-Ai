@@ -1,6 +1,5 @@
 """
 Point d'entrée principal - Jeu de Dames
-Architecture professionnelle
 """
 import sys
 from typing import Optional
@@ -18,7 +17,6 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Op
     Args:
         white_player: Joueur blanc (humain ou IA)
         black_player: Joueur noir (humain ou IA)
-        renderer: Moteur de rendu graphique (optionnel)
     
     Returns:
         Nom du gagnant ou None si abandon
@@ -33,6 +31,15 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Op
     print(f"{'='*50}\n")
     
     move_count = 0
+    position_counts = {}
+    
+    def _state_key(b: Board):
+        return (
+            tuple(tuple(cell.value for cell in row) for row in b.grid),
+            b.current_player
+        )
+    
+    position_counts[_state_key(board)] = 1
     
     while not game_state.is_game_over():
         move_count += 1
@@ -78,6 +85,15 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Op
         
         # Appliquer le coup
         game_state.apply_move(move)
+        
+        # Détection de répétition (match nul si même position 3 fois)
+        state_key = _state_key(board)
+        position_counts[state_key] = position_counts.get(state_key, 0) + 1
+        if position_counts[state_key] >= 3:
+            print("\nMatch nul (répétition de position) !")
+            if renderer:
+                renderer.show_message("Match nul (répétition de position)")
+            return "Match nul"
     
     # Partie terminée
     winner = game_state.get_winner()
@@ -100,13 +116,13 @@ def main_menu():
     print("""
 ╔════════════════════════════════════════╗
 ║       JEU DE DAMES - IA                ║
-║     Architecture Professionnelle       ║
+║                                        ║
 ╚════════════════════════════════════════╝
 
 1. Humain vs IA Facile
 2. Humain vs IA Moyen  
 3. Humain vs IA Difficile
-4. IA vs IA (Démo)
+4. IA easy vs IA hard (Démo)
 5. Tests de performance
 6. Quitter
 """)
@@ -157,10 +173,14 @@ def play_vs_ai(difficulty: Difficulty):
 
 def demo_ai_vs_ai():
     """Démo IA vs IA"""
+    from gui import get_renderer
+    
+    renderer = get_renderer()
+    
     ai_easy = AIPlayer(Difficulty.EASY)
     ai_hard = AIPlayer(Difficulty.HARD)
     
-    play_game(ai_easy, ai_hard)
+    play_game(ai_easy, ai_hard, renderer)
 
 
 def run_performance_tests():
