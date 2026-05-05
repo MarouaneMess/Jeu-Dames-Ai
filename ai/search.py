@@ -24,7 +24,8 @@ def minimax(
     depth: int, 
     maximizing: bool, 
     evaluator: IEvaluator, 
-    stats: SearchStats
+    stats: SearchStats,
+    last_move: Move | None = None
 ) -> Tuple[float, Move | None]:
     """
     Algorithme Minimax classique
@@ -49,10 +50,13 @@ def minimax(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = minimax(child_board, depth - 1, False, evaluator, stats)
+            score, _ = minimax(child_board, depth - 1, False, evaluator, stats, last_move)
             
             if score > max_score:
                 max_score = score
+                best_move = move
+            elif score == max_score and last_move and move != last_move and best_move == last_move:
+                # Tie-breaking: préférer un coup différent du dernier si le score est égal
                 best_move = move
         
         return max_score, best_move
@@ -62,10 +66,13 @@ def minimax(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = minimax(child_board, depth - 1, True, evaluator, stats)
+            score, _ = minimax(child_board, depth - 1, True, evaluator, stats, last_move)
             
             if score < min_score:
                 min_score = score
+                best_move = move
+            elif score == min_score and last_move and move != last_move and best_move == last_move:
+                # Tie-breaking: préférer un coup différent du dernier si le score est égal
                 best_move = move
         
         return min_score, best_move
@@ -79,7 +86,8 @@ def alphabeta(
     maximizing: bool, 
     evaluator: IEvaluator, 
     stats: SearchStats,
-    move_ordering: bool = True
+    move_ordering: bool = True,
+    last_move: Move | None = None
 ) -> Tuple[float, Move | None]:
     """
     Algorithme Alpha-Beta avec élagage
@@ -107,10 +115,13 @@ def alphabeta(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = alphabeta(child_board, depth - 1, alpha, beta, False, evaluator, stats, move_ordering)
+            score, _ = alphabeta(child_board, depth - 1, alpha, beta, False, evaluator, stats, move_ordering, last_move)
             
             if score > max_score:
                 max_score = score
+                best_move = move
+            elif score == max_score and last_move and move != last_move and best_move == last_move:
+                # Tie-breaking: préférer un coup différent du dernier si le score est égal
                 best_move = move
             
             alpha = max(alpha, score)
@@ -124,10 +135,13 @@ def alphabeta(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = alphabeta(child_board, depth - 1, alpha, beta, True, evaluator, stats, move_ordering)
+            score, _ = alphabeta(child_board, depth - 1, alpha, beta, True, evaluator, stats, move_ordering, last_move)
             
             if score < min_score:
                 min_score = score
+                best_move = move
+            elif score == min_score and last_move and move != last_move and best_move == last_move:
+                # Tie-breaking: préférer un coup différent du dernier si le score est égal
                 best_move = move
             
             beta = min(beta, score)
@@ -168,7 +182,8 @@ def choose_move(
     board: Board,
     depth: int,
     evaluator: IEvaluator,
-    use_alphabeta: bool = True
+    use_alphabeta: bool = True,
+    last_move: Move | None = None
 ) -> Tuple[Move, SearchStats]:
     """
     Choisit le meilleur coup avec stats
@@ -178,6 +193,7 @@ def choose_move(
         depth: Profondeur de recherche
         evaluator: Fonction d'évaluation
         use_alphabeta: True pour Alpha-Beta, False pour Minimax
+        last_move: Dernier coup joué (pour éviter les répétitions)
     
     Returns:
         (meilleur_coup, statistiques)
@@ -187,10 +203,11 @@ def choose_move(
     
     if use_alphabeta:
         _, best_move = alphabeta(
-            board, depth, float('-inf'), float('inf'), True, evaluator, stats
+            board, depth, float('-inf'), float('inf'), True, evaluator, stats, 
+            move_ordering=True, last_move=last_move
         )
     else:
-        _, best_move = minimax(board, depth, True, evaluator, stats)
+        _, best_move = minimax(board, depth, True, evaluator, stats, last_move)
     
     stats.time_seconds = time.time() - start_time
     stats.depth_reached = depth

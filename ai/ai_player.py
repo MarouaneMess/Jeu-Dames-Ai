@@ -22,18 +22,19 @@ class AIPlayer(IPlayer):
     def __init__(self, difficulty: Difficulty):
         self.difficulty = difficulty
         self.last_stats: SearchStats | None = None
+        self.last_move: Move | None = None  # Dernier coup joué par cette IA
         
         # Configuration selon la difficulté
         if difficulty == Difficulty.EASY:
-            self.depth = 2
+            self.depth = 1
             self.evaluator = MaterialEvaluator()
             self.use_alphabeta = False  # Minimax simple
         elif difficulty == Difficulty.MEDIUM:
-            self.depth = 4
+            self.depth = 3
             self.evaluator = MobilityEvaluator()
             self.use_alphabeta = True  # Alpha-Beta
         else:  # HARD
-            self.depth = 7
+            self.depth = 6
             self.evaluator = AdvancedEvaluator()
             self.use_alphabeta = True  # Alpha-Beta
     
@@ -43,9 +44,11 @@ class AIPlayer(IPlayer):
             board, 
             self.depth, 
             self.evaluator, 
-            self.use_alphabeta
+            self.use_alphabeta,
+            last_move=self.last_move
         )
         self.last_stats = stats
+        self.last_move = move  # Mémoriser pour la prochaine fois
         return move
     
     def get_name(self) -> str:
