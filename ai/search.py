@@ -2,8 +2,9 @@
 Algorithmes de recherche Minimax et Alpha-Beta
 """
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, List
 import time
+import random
 
 from models.board import Board
 from models.move import Move
@@ -25,8 +26,9 @@ def minimax(
     maximizing: bool, 
     evaluator: IEvaluator, 
     stats: SearchStats,
-    last_move: Move | None = None
-) -> Tuple[float, Move | None]:
+    last_move: Move | None = None,
+    collect_best_moves: bool = False
+) -> Tuple[float, Move | None | List[Move]]:
     """
     Algorithme Minimax classique
     Explore tout l'arbre jusqu'à la profondeur donnée
@@ -39,9 +41,9 @@ def minimax(
     # Cas terminal
     if depth == 0 or len(legal_moves) == 0:
         score = evaluator.evaluate(board)
-        return score if maximizing else -score, None
+        return score if maximizing else -score, (None if not collect_best_moves else [])
     
-    best_move = None
+    best_moves = []
     
     if maximizing:
         max_score = float('-inf')
@@ -50,32 +52,36 @@ def minimax(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = minimax(child_board, depth - 1, False, evaluator, stats, last_move)
+            score, _ = minimax(child_board, depth - 1, False, evaluator, stats, last_move, collect_best_moves=False)
             
             if score > max_score:
                 max_score = score
-                best_move = move
-            elif score == max_score and last_move and move != last_move and best_move == last_move:
-                # Tie-breaking: préférer un coup différent du dernier si le score est égal
-                best_move = move
+                best_moves = [move]
+            elif score == max_score:
+                best_moves.append(move)
         
-        return max_score, best_move
+        if collect_best_moves:
+            return max_score, best_moves
+        else:
+            return max_score, best_moves[0] if best_moves else None
     else:
         min_score = float('inf')
         for move in legal_moves:
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = minimax(child_board, depth - 1, True, evaluator, stats, last_move)
+            score, _ = minimax(child_board, depth - 1, True, evaluator, stats, last_move, collect_best_moves=False)
             
             if score < min_score:
                 min_score = score
-                best_move = move
-            elif score == min_score and last_move and move != last_move and best_move == last_move:
-                # Tie-breaking: préférer un coup différent du dernier si le score est égal
-                best_move = move
+                best_moves = [move]
+            elif score == min_score:
+                best_moves.append(move)
         
-        return min_score, best_move
+        if collect_best_moves:
+            return min_score, best_moves
+        else:
+            return min_score, best_moves[0] if best_moves else None
 
 
 def alphabeta(
@@ -87,8 +93,9 @@ def alphabeta(
     evaluator: IEvaluator, 
     stats: SearchStats,
     move_ordering: bool = True,
-    last_move: Move | None = None
-) -> Tuple[float, Move | None]:
+    last_move: Move | None = None,
+    collect_best_moves: bool = False
+) -> Tuple[float, Move | None | List[Move]]:
     """
     Algorithme Alpha-Beta avec élagage
     Plus efficace que Minimax grâce à l'élagage des branches
@@ -101,13 +108,13 @@ def alphabeta(
     # Cas terminal
     if depth == 0 or len(legal_moves) == 0:
         score = evaluator.evaluate(board)
-        return score if maximizing else -score, None
+        return score if maximizing else -score, (None if not collect_best_moves else [])
     
     # Tri des coups (captures en premier)
     if move_ordering:
         legal_moves = _order_moves(board, legal_moves)
     
-    best_move = None
+    best_moves = []
     
     if maximizing:
         max_score = float('-inf')
@@ -115,40 +122,44 @@ def alphabeta(
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = alphabeta(child_board, depth - 1, alpha, beta, False, evaluator, stats, move_ordering, last_move)
+            score, _ = alphabeta(child_board, depth - 1, alpha, beta, False, evaluator, stats, move_ordering, last_move, collect_best_moves=False)
             
             if score > max_score:
                 max_score = score
-                best_move = move
-            elif score == max_score and last_move and move != last_move and best_move == last_move:
-                # Tie-breaking: préférer un coup différent du dernier si le score est égal
-                best_move = move
+                best_moves = [move]
+            elif score == max_score:
+                best_moves.append(move)
             
             alpha = max(alpha, score)
             if beta <= alpha:
                 break  # Coupure Beta
         
-        return max_score, best_move
+        if collect_best_moves:
+            return max_score, best_moves
+        else:
+            return max_score, best_moves[0] if best_moves else None
     else:
         min_score = float('inf')
         for move in legal_moves:
             child_board = board.clone()
             child_board.apply_move(move)
             
-            score, _ = alphabeta(child_board, depth - 1, alpha, beta, True, evaluator, stats, move_ordering, last_move)
+            score, _ = alphabeta(child_board, depth - 1, alpha, beta, True, evaluator, stats, move_ordering, last_move, collect_best_moves=False)
             
             if score < min_score:
                 min_score = score
-                best_move = move
-            elif score == min_score and last_move and move != last_move and best_move == last_move:
-                # Tie-breaking: préférer un coup différent du dernier si le score est égal
-                best_move = move
+                best_moves = [move]
+            elif score == min_score:
+                best_moves.append(move)
             
             beta = min(beta, score)
             if beta <= alpha:
                 break  # Coupure Alpha
         
-        return min_score, best_move
+        if collect_best_moves:
+            return min_score, best_moves
+        else:
+            return min_score, best_moves[0] if best_moves else None
 
 
 def _order_moves(board: Board, moves: list[Move]) -> list[Move]:
@@ -202,12 +213,16 @@ def choose_move(
     start_time = time.time()
     
     if use_alphabeta:
-        _, best_move = alphabeta(
+        _, best_moves = alphabeta(
             board, depth, float('-inf'), float('inf'), True, evaluator, stats, 
-            move_ordering=True, last_move=last_move
+            move_ordering=True, last_move=last_move, collect_best_moves=True
         )
     else:
-        _, best_move = minimax(board, depth, True, evaluator, stats, last_move)
+        _, best_moves = minimax(board, depth, True, evaluator, stats, last_move, collect_best_moves=True)
+    
+    # Choisir aléatoirement parmi tous les meilleurs coups
+    # Cela crée de la variabilité sans sacrifier la qualité
+    best_move = random.choice(best_moves) if best_moves else None
     
     stats.time_seconds = time.time() - start_time
     stats.depth_reached = depth

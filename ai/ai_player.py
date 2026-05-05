@@ -13,7 +13,8 @@ class Difficulty(Enum):
     """Niveaux de difficulté de l'IA"""
     EASY = 1
     MEDIUM = 2
-    HARD = 3
+    HARD_BALANCED = 3
+    HARD = 4
 
 
 class AIPlayer(IPlayer):
@@ -31,6 +32,10 @@ class AIPlayer(IPlayer):
             self.use_alphabeta = False  # Minimax simple
         elif difficulty == Difficulty.MEDIUM:
             self.depth = 3
+            self.evaluator = MobilityEvaluator()
+            self.use_alphabeta = True  # Alpha-Beta
+        elif difficulty == Difficulty.HARD_BALANCED:
+            self.depth = 5
             self.evaluator = MobilityEvaluator()
             self.use_alphabeta = True  # Alpha-Beta
         else:  # HARD
@@ -53,7 +58,13 @@ class AIPlayer(IPlayer):
     
     def get_name(self) -> str:
         """Nom du joueur IA"""
-        return f"IA {self.difficulty.name.capitalize()}"
+        names = {
+            Difficulty.EASY: "IA Facile",
+            Difficulty.MEDIUM: "IA Moyen",
+            Difficulty.HARD_BALANCED: "IA Difficile (équilibrée)",
+            Difficulty.HARD: "IA Difficile",
+        }
+        return names[self.difficulty]
     
     def get_stats(self) -> SearchStats | None:
         """Retourne les stats de la dernière recherche"""

@@ -122,9 +122,10 @@ def main_menu():
 1. Humain vs IA Facile
 2. Humain vs IA Moyen  
 3. Humain vs IA Difficile
-4. IA easy vs IA hard (Démo)
-5. Tests de performance
-6. Quitter
+4. IA Moyen vs IA Difficile (Démo)
+5. IA easy vs IA hard (Démo)
+6. Tests de performance
+7. Quitter
 """)
     
     choice = input("Votre choix: ").strip()
@@ -136,10 +137,12 @@ def main_menu():
     elif choice == '3':
         play_vs_ai(Difficulty.HARD)
     elif choice == '4':
-        demo_ai_vs_ai()
+        demo_medium_vs_hard()
     elif choice == '5':
-        run_performance_tests()
+        demo_ai_vs_ai()
     elif choice == '6':
+        run_performance_tests()
+    elif choice == '7':
         print("Au revoir !")
         sys.exit(0)
     else:
@@ -181,6 +184,18 @@ def demo_ai_vs_ai():
     ai_hard = AIPlayer(Difficulty.HARD)
     
     play_game(ai_easy, ai_hard, renderer)
+
+
+def demo_medium_vs_hard():
+    """Démo IA Moyen vs IA Difficile"""
+    from gui import get_renderer
+
+    renderer = get_renderer()
+
+    ai_medium = AIPlayer(Difficulty.MEDIUM)
+    ai_hard = AIPlayer(Difficulty.HARD)
+
+    play_game(ai_medium, ai_hard, renderer)
 
 
 def run_performance_tests():
