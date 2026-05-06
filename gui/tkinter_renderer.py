@@ -1,6 +1,4 @@
-"""
-Renderer Tkinter - Fallback si Pygame non disponible
-"""
+
 import tkinter as tk
 from tkinter import messagebox
 from typing import List
@@ -12,7 +10,7 @@ from models.game_state import GameState
 
 
 class TkinterRenderer(IRenderer):
-    """Moteur de rendu Tkinter (fallback)"""
+    
     
     def __init__(self, cell_size: int = 60):
         self.cell_size = cell_size

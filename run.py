@@ -50,8 +50,8 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Op
         # Afficher le plateau
         if renderer:
             renderer.render(board)
-        else:
-            print(board.pretty_print())
+        # else:
+        #     print(board.pretty_print())
         
         # Choisir le coup
         print(f"{current_player.get_name()} réfléchit...")
@@ -124,8 +124,9 @@ def main_menu():
 3. Humain vs IA Difficile
 4. IA Moyen vs IA Difficile (Démo)
 5. IA easy vs IA hard (Démo)
-6. Tests de performance
-7. Quitter
+6. IA hard vs IA hard (Démo)
+7. Tests de performance
+8. Quitter
 """)
     
     choice = input("Votre choix: ").strip()
@@ -141,8 +142,10 @@ def main_menu():
     elif choice == '5':
         demo_ai_vs_ai()
     elif choice == '6':
-        run_performance_tests()
+        demo_hard_vs_hard()
     elif choice == '7':
+        run_performance_tests()
+    elif choice == '8':
         print("Au revoir !")
         sys.exit(0)
     else:
@@ -196,6 +199,17 @@ def demo_medium_vs_hard():
     ai_hard = AIPlayer(Difficulty.HARD)
 
     play_game(ai_medium, ai_hard, renderer)
+
+def demo_hard_vs_hard():
+    """Démo IA Difficile vs IA Difficile"""
+    from gui import get_renderer
+
+    renderer = get_renderer()
+
+    ai_hard_1 = AIPlayer(Difficulty.HARD)
+    ai_hard_2 = AIPlayer(Difficulty.HARD)
+
+    play_game(ai_hard_1, ai_hard_2, renderer)
 
 
 def run_performance_tests():
