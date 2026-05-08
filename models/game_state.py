@@ -40,7 +40,7 @@ class GameState:
     def __init__(self, board: Board):
         self.board = board
         self.start_time = time.time()
-        self.moves_without_capture = 0  # Règle des 50 coups sans capture
+        self.moves_without_capture = 0  # Règle des 20 coups sans capture
     
     def generate_legal_moves(self, player: Player | None = None) -> List[Move]:
         """
@@ -267,8 +267,8 @@ class GameState:
             self.moves_without_capture += 1
     
     def is_draw_by_fifty_moves(self) -> bool:
-        """Vérifie si c'est un match nul (50 coups sans capture)"""
-        return self.moves_without_capture >= 50
+        """Vérifie si c'est un match nul (20 coups sans capture)"""
+        return self.moves_without_capture >= 20
     
     def get_time(self) -> float:
         """temps de la partie"""

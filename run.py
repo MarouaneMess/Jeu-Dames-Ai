@@ -90,12 +90,12 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
         # Vérifier les positions répétées (pour un match nul)
         state_key = _state_key(board)
         position_counts[state_key] = position_counts.get(state_key, 0) + 1
-        if position_counts[state_key] >= 10:
+        if position_counts[state_key] >= 5:
             if renderer:
-                renderer.show_message("Match nul par répétition de position 10 fois !")
+                renderer.show_message("Match nul par répétition de position 5 fois !")
 
             print(f"\n{'='*50}")
-            print("Position répétée 10 fois. Match nul.")
+            print("Position répétée 5 fois. Match nul.")
             print(f"PARTIE TERMINÉE !")
             print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
             print(f"{'='*50}\n")
