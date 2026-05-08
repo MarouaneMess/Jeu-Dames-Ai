@@ -1,4 +1,5 @@
 import csv
+import os
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -113,13 +114,19 @@ class Tournament:
         print("=" * 50 + "\n")
     
     def save_summary_csv(self, filename: str = None) -> str:
-    
+        """Sauvegarde dans le répertoire tournaments/ toujours."""
         if not self.results:
             print("Aucun résultat à sauvegarder.")
             return None
         
+        # Déterminer le répertoire tournaments/ (même répertoire que ce fichier)
+        tournament_dir = os.path.dirname(os.path.abspath(__file__))
+        
         if filename is None:
             filename = "tournament_summary.csv"
+        
+        # Chemin complet du fichier CSV
+        filepath = os.path.join(tournament_dir, filename)
         
         # Agréger les résultats
         white_lvl = self.results[0].white_lvl
@@ -132,13 +139,13 @@ class Tournament:
         # Écrire le CSV (append si existe, sinon créer)
         file_exists = False
         try:
-            with open(filename, 'r', encoding='utf-8'):
+            with open(filepath, 'r', encoding='utf-8'):
                 file_exists = True
         except FileNotFoundError:
             file_exists = False
         
-        with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
-            fieldnames = [ 'white_level', 'black_level', 
+        with open(filepath, 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = ['white_level', 'black_level', 
                          'white_wins', 'black_wins', 'draws', 'time_seconds']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
@@ -154,4 +161,4 @@ class Tournament:
                 'time_seconds': f"{self.total_time:.2f}",
             })
         
-        return filename
+        return filepath
