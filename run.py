@@ -79,9 +79,9 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
         if game_state.is_draw_by_fifty_moves():
             if renderer:
                 renderer.show_message("Match nul (50 coups sans capture) !")
-            if not silence:
-                print("50 coups sans capture. Match nul.")
+            
             print(f"\n{'='*50}")
+            print("50 coups sans capture. Match nul.")
             print(f"PARTIE TERMINÉE !")
             print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
             print(f"{'='*50}\n")
@@ -93,10 +93,9 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
         if position_counts[state_key] >= 10:
             if renderer:
                 renderer.show_message("Match nul par répétition de position 10 fois !")
-            if not silence:
-                print("Position répétée 10 fois. Match nul.")
 
             print(f"\n{'='*50}")
+            print("Position répétée 10 fois. Match nul.")
             print(f"PARTIE TERMINÉE !")
             print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
             print(f"{'='*50}\n")
@@ -117,7 +116,9 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
     print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
     print(f"{'='*50}\n")
 
-    return winner_name
+    # Retourner la couleur gagnante en minuscule ('blanc'/'noir') pour faciliter
+    # l'identification lorsque les deux IA ont le même nom.
+    return winner_color.lower()
 
 """focntions pour lancer des partie avec gui, affichage console ou non"""
 def play_game_gui( white_player: IPlayer, black_player: IPlayer) -> Optional[str]:

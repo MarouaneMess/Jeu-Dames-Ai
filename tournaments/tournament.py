@@ -27,12 +27,8 @@ def _run_single_match(match_number: int, level_1: Difficulty, level_2: Difficult
     white_player = AIPlayer(level_1)
     black_player = AIPlayer(level_2)
 
-    winner_name = play_game_silent(white_player, black_player)
-    winner_color = "nul"
-    if winner_name == white_player.get_name():
-        winner_color = "blanc"
-    elif winner_name == black_player.get_name():
-        winner_color = "noir"
+    # play_game_silent now returns the winner color as 'blanc'/'noir'/'nul'.
+    winner_color = play_game_silent(white_player, black_player) or "nul"
 
     return MatchResult(
         match_number=match_number,
