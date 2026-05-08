@@ -34,7 +34,7 @@ class AIPlayer(IPlayer):
             self.evaluator = MobilityEvaluator()
             self.use_alphabeta = True  # Alpha-Beta
         else:  # HARD
-            self.depth = 6
+            self.depth = 5
             self.evaluator = AdvancedEvaluator()
             self.use_alphabeta = True  # Alpha-Beta
     

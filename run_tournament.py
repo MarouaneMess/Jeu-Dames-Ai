@@ -50,7 +50,7 @@ def main() -> None:
     level_one = ask_level("Choisissez le niveau de la première IA:")
     level_two = ask_level("Choisissez le niveau de la deuxième IA:")
     match_count = ask_match_count()
-    workers = 20
+    workers = 15
 
     tournament = Tournament()
     start = time.perf_counter()
