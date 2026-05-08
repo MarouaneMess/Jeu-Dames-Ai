@@ -1,8 +1,11 @@
 """
 Lancement simple d'un tournoi de dames entre deux IA.
 """
+import os
+import time
+
 from ai.ai_player import Difficulty
-from tournament import Tournament
+from tournaments.tournament import Tournament
 
 
 def ask_level(prompt: str) -> Difficulty:
@@ -47,11 +50,17 @@ def main() -> None:
     level_one = ask_level("Choisissez le niveau de la première IA:")
     level_two = ask_level("Choisissez le niveau de la deuxième IA:")
     match_count = ask_match_count()
+    workers = 12
 
     tournament = Tournament()
-    tournament.run(level_one, level_two, match_count)
+    start = time.perf_counter()
+    tournament.run(level_one, level_two, match_count, max_workers=workers)
+    elapsed = time.perf_counter() - start
     tournament.print_results()
 
+    print(f"\n{'='*50}")
+    print(f"Temps total mesuré: {elapsed:.2f} secondes ")
+    print(f"{'='*50}\n")
 
 if __name__ == "__main__":
     main()

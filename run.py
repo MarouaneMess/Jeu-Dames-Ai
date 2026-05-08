@@ -1,6 +1,3 @@
-"""
-Point d'entrée principal - Jeu de Dames
-"""
 import sys
 from typing import Optional
 
@@ -10,29 +7,21 @@ from ai.ai_player import AIPlayer, Difficulty
 from interfaces.player import IPlayer
 
 
-def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Optional[str]:
-    """
-    Joue une partie complète
-    
-    Args:
-        white_player: Joueur blanc (humain ou IA)
-        black_player: Joueur noir (humain ou IA)
-    
-    Returns:
-        Nom du gagnant ou None si abandon
-    """
+"""focntion pricipale pour lancer une partie """
+def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silence: bool = True) -> Optional[str]:
     board = Board.initial_board()
     game_state = GameState(board)
-    
-    print(f"\n{'='*50}")
-    print(f"NOUVELLE PARTIE")
-    print(f"Blancs: {white_player.get_name()}")
-    print(f"Noirs: {black_player.get_name()}")
-    print(f"{'='*50}\n")
-    
+
+    if not silence: 
+        print(f"\n{'='*50}")
+        print(f"NOUVELLE PARTIE")
+        print(f"Blancs: {white_player.get_name()}")
+        print(f"Noirs: {black_player.get_name()}")
+        print(f"{'='*50}\n")
+
     move_count = 0
     position_counts = {}
-    
+
     def _state_key(b: Board):
         return (
             tuple(tuple(cell.value for cell in row) for row in b.grid),
@@ -40,204 +29,208 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None) -> Op
         )
     
     position_counts[_state_key(board)] = 1
-    
+
     while not game_state.is_game_over():
         move_count += 1
         current_player = white_player if board.current_player.name == 'WHITE' else black_player
-        
-        print(f"\n--- Tour {move_count} ({board.current_player}) ---")
-        
+
+        if not silence:
+            print(f"\n--- Tour {move_count} ({board.current_player}) ---")
+
         # Afficher le plateau
         if renderer:
             renderer.render(board)
-        # else:
-        #     print(board.pretty_print())
-        
+        elif not silence:
+            print(board.pretty_print())
+
         # Choisir le coup
-        print(f"{current_player.get_name()} réfléchit...")
-        
+        if not silence:
+            print(f"{current_player.get_name()} réfléchit...")
+
         try:
             if hasattr(current_player, 'wait_for_move'):
                 # Joueur humain avec interface graphique
                 move = renderer.wait_for_move(board) if renderer else None
                 if move is None:
-                    print("Abandon !")
+                    print("Aucun coup reçu. Fin de la partie.")
                     return None
             else:
                 # Joueur IA
                 move = current_player.choose_move(board)
-                
+
                 # Afficher les stats de l'IA
-                if isinstance(current_player, AIPlayer):
+                if not silence and isinstance(current_player, AIPlayer) and current_player.get_stats():
                     stats = current_player.get_stats()
-                    if stats:
-                        print(f"  → Nœuds explorés: {stats.nodes_explored}")
-                        print(f"  → Temps: {stats.time_seconds:.3f}s")
-        
+                    print(f"Stats de recherche: Profondeur={stats.depth}, Noeuds explorés={stats.nodes_explored}, Temps={stats.time:.3f}s")
         except KeyboardInterrupt:
-            print("\nPartie interrompue !")
+            print("Partie interrompue par l'utilisateur.")
             return None
+
         except Exception as e:
             print(f"Erreur: {e}")
             return None
-        
-        print(f"Coup joué: {move}")
-        
+        if not silence:
+            print(f"Coup choisi: {move}")
+
         # Appliquer le coup
-        game_state.apply_move(move)
+        board.apply_move(move)
         
-        # Détection de répétition (match nul si même position 3 fois)
+        # Vérifier la règle des 50 coups sans capture (nul)
+        if game_state.is_draw_by_fifty_moves():
+            if renderer:
+                renderer.show_message("Match nul (50 coups sans capture) !")
+            if not silence:
+                print("50 coups sans capture. Match nul.")
+            print(f"\n{'='*50}")
+            print(f"PARTIE TERMINÉE !")
+            print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
+            print(f"{'='*50}\n")
+            return "nul"
+
+        # Vérifier les positions répétées (pour un match nul)
         state_key = _state_key(board)
         position_counts[state_key] = position_counts.get(state_key, 0) + 1
-        if position_counts[state_key] >= 3:
-            print("\nMatch nul (répétition de position) !")
+        if position_counts[state_key] >= 10:
             if renderer:
-                renderer.show_message("Match nul (répétition de position)")
-            return "Match nul"
-    
+                renderer.show_message("Match nul par répétition de position 10 fois !")
+            if not silence:
+                print("Position répétée 10 fois. Match nul.")
+
+            print(f"\n{'='*50}")
+            print(f"PARTIE TERMINÉE !")
+            print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
+            print(f"{'='*50}\n")
+
+            return "nul"
+        
     # Partie terminée
     winner = game_state.get_winner()
     winner_name = white_player.get_name() if winner.name == 'WHITE' else black_player.get_name()
-    
+    winner_color = "Blanc" if winner.name == 'WHITE' else "Noir"
+    if renderer:
+        renderer.show_message(f"Victoire de {winner_name} ({winner_color}) !")
+
     print(f"\n{'='*50}")
     print(f"PARTIE TERMINÉE !")
-    print(f"Gagnant: {winner_name}")
+    print(f"Gagnant: {winner_name} | Couleur: {winner_color}")
     print(f"Nombre de tours: {move_count}")
+    print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
     print(f"{'='*50}\n")
-    
-    if renderer:
-        renderer.show_message(f"Gagnant: {winner_name}")
-    
+
     return winner_name
 
-
-def main_menu():
-    """Menu principal"""
-    print("""
-╔════════════════════════════════════════╗
-║       JEU DE DAMES - IA                ║
-║                                        ║
-╚════════════════════════════════════════╝
-
-1. Humain vs IA Facile
-2. Humain vs IA Moyen  
-3. Humain vs IA Difficile
-4. IA Moyen vs IA Difficile (Démo)
-5. IA easy vs IA hard (Démo)
-6. IA hard vs IA hard (Démo)
-7. Tests de performance
-8. Quitter
-""")
-    
-    choice = input("Votre choix: ").strip()
-    
-    if choice == '1':
-        play_vs_ai(Difficulty.EASY)
-    elif choice == '2':
-        play_vs_ai(Difficulty.MEDIUM)
-    elif choice == '3':
-        play_vs_ai(Difficulty.HARD)
-    elif choice == '4':
-        demo_medium_vs_hard()
-    elif choice == '5':
-        demo_ai_vs_ai()
-    elif choice == '6':
-        demo_hard_vs_hard()
-    elif choice == '7':
-        run_performance_tests()
-    elif choice == '8':
-        print("Au revoir !")
-        sys.exit(0)
-    else:
-        print("Choix invalide !")
-        main_menu()
-
-
-def play_vs_ai(difficulty: Difficulty):
-    """Joue contre l'IA"""
+"""focntions pour lancer des partie avec gui, affichage console ou non"""
+def play_game_gui( white_player: IPlayer, black_player: IPlayer) -> Optional[str]:
     from gui import get_renderer
-    
     renderer = get_renderer()
-    
+    try:
+        return play_game(white_player, black_player, renderer=renderer, silence=True)
+    finally:
+        renderer.cleanup()
+
+def play_game_console(white_player: IPlayer, black_player: IPlayer) -> Optional[str]:
+    return play_game(white_player, black_player, renderer=None, silence=False)
+
+""" pour les tournois"""
+def play_game_silent(white_player: IPlayer, black_player: IPlayer) -> Optional[str]:
+    return play_game(white_player, black_player, renderer=None, silence=True)
+
+"""focntion pour une partie humain vs ia"""
+def human_vs_ai(ai_difficulty: Difficulty):
     class HumanPlayer(IPlayer):
-        def __init__(self, renderer):
-            self.renderer = renderer
-        
-        def choose_move(self, board: Board):
-            return self.renderer.wait_for_move(board)
-        
         def get_name(self):
-            return "Humain"
-    
-    human = HumanPlayer(renderer)
-    ai = AIPlayer(difficulty)
-    
-    play_game(human, ai, renderer)
-    
-    renderer.cleanup()
+            return "Joueur Humain"
+        def choose_move(self, board):
+            return None  # Le coup sera choisi via l'interface graphique
+        def wait_for_move(self):
+            pass  # Méthode pour attendre le coup du joueur humain via l'interface graphique
 
+    human_player = HumanPlayer()
+    ai_player = AIPlayer(ai_difficulty)
+    return play_game_gui(human_player, ai_player)
 
-def demo_ai_vs_ai():
-    """Démo IA vs IA"""
-    from gui import get_renderer
-    
-    renderer = get_renderer()
-    
-    ai_easy = AIPlayer(Difficulty.EASY)
-    ai_hard = AIPlayer(Difficulty.HARD)
-    
-    play_game(ai_easy, ai_hard, renderer)
-
-
-def demo_medium_vs_hard():
-    """Démo IA Moyen vs IA Difficile"""
-    from gui import get_renderer
-
-    renderer = get_renderer()
-
-    ai_medium = AIPlayer(Difficulty.MEDIUM)
-    ai_hard = AIPlayer(Difficulty.HARD)
-
-    play_game(ai_medium, ai_hard, renderer)
-
-def demo_hard_vs_hard():
-    """Démo IA Difficile vs IA Difficile"""
-    from gui import get_renderer
-
-    renderer = get_renderer()
-
-    ai_hard_1 = AIPlayer(Difficulty.HARD)
-    ai_hard_2 = AIPlayer(Difficulty.HARD)
-
-    play_game(ai_hard_1, ai_hard_2, renderer)
-
-
-def run_performance_tests():
-    """Tests de performance de l'IA"""
+"""focntion pour les performances"""
+def performance_tests():
     from ai.search import choose_move
     from ai.evaluators import MaterialEvaluator, MobilityEvaluator, AdvancedEvaluator
-    
+
     board = Board.initial_board()
-    
-    print("\n=== TESTS DE PERFORMANCE ===\n")
-    
+    print("TEST DE PERFORMANCES  :")
     tests = [
-        ("Facile (Minimax depth=2)", 2, MaterialEvaluator(), False),
-        ("Moyen (Alpha-Beta depth=4)", 4, MobilityEvaluator(), True),
-        ("Difficile (Alpha-Beta depth=5)", 5, AdvancedEvaluator(), True),
+        ("Facile (Minimax, profondeur 1)",1,MaterialEvaluator(), False),
+        ("Moyen (Alpha-Beta, profondeur 3)",3,MobilityEvaluator(), True),
+        ("Difficile (Alpha-Beta, profondeur 5)",5,MobilityEvaluator(), True),
     ]
-    
     for name, depth, evaluator, use_ab in tests:
-        print(f"{name}:")
-        move, stats = choose_move(board, depth, evaluator, use_ab)
-        print(f"  Nœuds explorés: {stats.nodes_explored}")
-        print(f"  Temps: {stats.time_seconds:.3f}s")
-        print(f"  Coup choisi: {move}\n")
+        print(f"\n{name} :")
+        move, stats = choose_move(board, depth, evaluator,use_ab)
+        print(f"Noeuds explorés : {stats.nodes_explored}")
+        print(f"Temps : {stats.time_seconds:.3f} secondes")
+        print(f"Coup choisi : {move}")
+
+"""focntoion pour le menu pricipal"""
+def main_menu():
+    """"menu pricipal"""
+    while True:
+        print ("""
+╔════════════════════════════════════════════════════╗
+║                                                    ║
+║                JEU DE DAMES                        ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║   [1]  Humain vs IA Facile                         ║
+║   [2]  Humain vs IA Moyen                          ║
+║   [3]  Humain vs IA Difficile                      ║
+║                                                    ║
+║   [4]  IA Facile vs IA Facile                      ║
+║   [5]  IA Moyen vs IA Moyen                        ║
+║   [6]  IA Difficile vs IA Difficile                ║
+║                                                    ║
+║   [7]  IA Facile vs IA Moyen                       ║
+║   [8]  IA Facile vs IA Difficile                   ║
+║   [9]  IA Moyen vs IA Difficile                    ║
+║                                                    ║
+║   [10]  Tests de performance                       ║
+║                                                    ║
+║   [11]  Quitter                                    ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝
+           """)
+    
+
+        choice = input("Votre choix: ").strip()
+
+        if choice == '1':
+            human_vs_ai(Difficulty.EASY)
+        elif choice == '2':
+            human_vs_ai(Difficulty.MEDIUM)
+        elif choice == '3':
+            human_vs_ai(Difficulty.HARD)
+        elif choice == '4':
+            play_game_gui(AIPlayer(Difficulty.EASY), AIPlayer(Difficulty.EASY))
+        elif choice == '5':
+            play_game_gui(AIPlayer(Difficulty.MEDIUM), AIPlayer(Difficulty.MEDIUM))
+        elif choice == '6':
+            play_game_gui(AIPlayer(Difficulty.HARD), AIPlayer(Difficulty.HARD))
+        elif choice == '7':
+            play_game_gui(AIPlayer(Difficulty.EASY), AIPlayer(Difficulty.MEDIUM))
+        elif choice == '8':
+            play_game_gui(AIPlayer(Difficulty.EASY), AIPlayer(Difficulty.HARD))
+        elif choice == '9':
+            play_game_gui(AIPlayer(Difficulty.MEDIUM), AIPlayer(Difficulty.HARD))
+        elif choice == '10':
+            performance_tests()
+        elif choice == '11':
+            print("Au revoir !")
+            break
+        else:
+            print("Choix invalide. Veuillez réessayer.")
 
 
 if __name__ == "__main__":
-    try:
+    try :
         main_menu()
     except KeyboardInterrupt:
-        print("\n\nAu revoir !")
+        print("\nProgramme interrompu par l'utilisateur. Au revoir !")
         sys.exit(0)

@@ -2,6 +2,7 @@
 État du jeu et règles (logique métier)
 """
 from typing import List, Set, Tuple
+import time
 from .board import Board
 from .move import Move, Position
 from .types import Player, Piece, CellState
@@ -38,6 +39,8 @@ class GameState:
     
     def __init__(self, board: Board):
         self.board = board
+        self.start_time = time.time()
+        self.moves_without_capture = 0  # Règle des 50 coups sans capture
     
     def generate_legal_moves(self, player: Player | None = None) -> List[Move]:
         """
@@ -256,3 +259,18 @@ class GameState:
     def apply_move(self, move: Move) -> None:
         """Applique un coup"""
         self.board.apply_move(move)
+        
+        # Gestion de la règle des 50 coups sans capture
+        if move.is_capture:
+            self.moves_without_capture = 0  # Reset si capture
+        else:
+            self.moves_without_capture += 1
+    
+    def is_draw_by_fifty_moves(self) -> bool:
+        """Vérifie si c'est un match nul (50 coups sans capture)"""
+        return self.moves_without_capture >= 50
+    
+    def get_time(self) -> float:
+        """temps de la partie"""
+        return time.time() - self.start_time
+

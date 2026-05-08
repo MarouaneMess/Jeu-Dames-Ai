@@ -1,6 +1,5 @@
 """
 Modèles du jeu de Dames
-Logique métier pure sans dépendances externes
 """
 
 from .types import Player, Piece, CellState
