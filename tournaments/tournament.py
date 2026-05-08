@@ -1,5 +1,8 @@
+import csv
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
 from ai.ai_player import AIPlayer, Difficulty
@@ -43,6 +46,7 @@ class Tournament:
 
     def __init__(self):
         self.results: List[MatchResult] = []
+        self.total_time: float = 0.0
 
     def run(
         self,
@@ -52,25 +56,26 @@ class Tournament:
         max_workers: int | None = None,
     ) -> List[MatchResult]:
         """Lance matchs """
+        start_time = time.perf_counter()
         self.results = []
 
         if max_workers is None or max_workers <= 1:
             for match_number in range(1, match_count + 1):
                 self.results.append(_run_single_match(match_number, level_1, level_2))
-            return self.results
+        else:
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(_run_single_match, match_number, level_1, level_2): match_number
+                    for match_number in range(1, match_count + 1)
+                }
 
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = {
-                executor.submit(_run_single_match, match_number, level_1, level_2): match_number
-                for match_number in range(1, match_count + 1)
-            }
+                completed_results: List[MatchResult] = []
+                for future in as_completed(futures):
+                    completed_results.append(future.result())
 
-            completed_results: List[MatchResult] = []
-            for future in as_completed(futures):
-                completed_results.append(future.result())
+            self.results = sorted(completed_results, key=lambda result: result.match_number)
 
-        self.results = sorted(completed_results, key=lambda result: result.match_number)
-
+        self.total_time = time.perf_counter() - start_time
         return self.results
 
     def get_results(self) -> List[MatchResult]:
@@ -104,4 +109,49 @@ class Tournament:
         print(f"Victoires blancs: {white_wins}")
         print(f"Victoires noirs: {black_wins}")
         print(f"Matchs nuls: {draws}")
+        print(f"Temps total du tournoi: {self.total_time:.2f} secondes")
         print("=" * 50 + "\n")
+    
+    def save_summary_csv(self, filename: str = None) -> str:
+    
+        if not self.results:
+            print("Aucun résultat à sauvegarder.")
+            return None
+        
+        if filename is None:
+            filename = "tournament_summary.csv"
+        
+        # Agréger les résultats
+        white_lvl = self.results[0].white_lvl
+        black_lvl = self.results[0].black_lvl
+        
+        white_wins = sum(1 for r in self.results if r.winner == "blanc")
+        black_wins = sum(1 for r in self.results if r.winner == "noir")
+        draws = sum(1 for r in self.results if r.winner == "nul")
+        
+        # Écrire le CSV (append si existe, sinon créer)
+        file_exists = False
+        try:
+            with open(filename, 'r', encoding='utf-8'):
+                file_exists = True
+        except FileNotFoundError:
+            file_exists = False
+        
+        with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = [ 'white_level', 'black_level', 
+                         'white_wins', 'black_wins', 'draws', 'time_seconds']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            
+            if not file_exists:
+                writer.writeheader()
+            
+            writer.writerow({
+                'white_level': white_lvl,
+                'black_level': black_lvl,
+                'white_wins': white_wins,
+                'black_wins': black_wins,
+                'draws': draws,
+                'time_seconds': f"{self.total_time:.2f}",
+            })
+        
+        return filename

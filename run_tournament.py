@@ -55,12 +55,11 @@ def main() -> None:
     tournament = Tournament()
     start = time.perf_counter()
     tournament.run(level_one, level_two, match_count, max_workers=workers)
-    elapsed = time.perf_counter() - start
     tournament.print_results()
 
-    print(f"\n{'='*50}")
-    print(f"Temps total mesuré: {elapsed:.2f} secondes ")
-    print(f"{'='*50}\n")
+    # Sauvegarder le résumé des stats
+    csv_file = tournament.save_summary_csv()
+    print(f"Résumé sauvegardé dans: {csv_file}")
 
 if __name__ == "__main__":
     main()
