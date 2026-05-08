@@ -260,13 +260,13 @@ class GameState:
         """Applique un coup"""
         self.board.apply_move(move)
         
-        # Gestion de la règle des 50 coups sans capture
+        # Gestion de la règle des 20 coups sans capture
         if move.is_capture:
             self.moves_without_capture = 0  # Reset si capture
         else:
             self.moves_without_capture += 1
     
-    def is_draw_by_fifty_moves(self) -> bool:
+    def is_draw_by_twenty_moves(self) -> bool:
         """Vérifie si c'est un match nul (20 coups sans capture)"""
         return self.moves_without_capture >= 20
     

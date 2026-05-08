@@ -75,13 +75,13 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
         # Appliquer le coup
         board.apply_move(move)
         
-        # Vérifier la règle des 50 coups sans capture (nul)
-        if game_state.is_draw_by_fifty_moves():
+        # Vérifier la règle des 20 coups sans capture (nul)
+        if game_state.is_draw_by_twenty_moves():
             if renderer:
-                renderer.show_message("Match nul (50 coups sans capture) !")
+                renderer.show_message("Match nul (20 coups sans capture) !")
             
             print(f"\n{'='*50}")
-            print("50 coups sans capture. Match nul.")
+            print("20 coups sans capture. Match nul.")
             print(f"PARTIE TERMINÉE !")
             print(f"Temps de la partie: {game_state.get_time():.2f} secondes")
             print(f"{'='*50}\n")
