@@ -1,6 +1,6 @@
 # 🎮 Jeu de Dames avec IA - Architecture Professionnelle
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![Tests](https://img.shields.io/badge/Tests-14%2F14-success)
 ![Architecture](https://img.shields.io/badge/Architecture-Professionnelle-purple)
 ![GUI](https://img.shields.io/badge/GUI-Tkinter-green)
@@ -14,8 +14,20 @@ python run.py
 # Tests
 pytest tests/ -v
 ```
+Exemples utiles:
 
-**👉 Voir [QUICKSTART.md](QUICKSTART.md) pour le guide complet**
+```bash
+# Lancer les benchmarks d'évaluateurs (génére CSV + PNG sous docs/benchmarks)
+python scripts/benchmark_evaluators.py
+
+# Résumer les tournois et générer le tableau de bord
+python scripts/summarize_tournaments.py
+
+# Lancer un tournoi automatisé (script dédié)
+python run_tournament.py
+```
+
+**👉 Voir [docs/QUICKSTART.md](docs/QUICKSTART.md) pour le guide complet**
 
 ---
 
@@ -35,25 +47,28 @@ Un jeu de Dames complet avec:
 ```
 projet/
 ├── models/         # Logique métier (Board, Move, GameState)
-├── ai/            # Intelligence artificielle (3 niveaux)
-├── gui/           # Interface graphique (Tkinter)
-├── interfaces/    # Abstractions (IPlayer, IEvaluator, IRenderer)
-├── tests/         # Tests unitaires (14 tests)
-├── run.py         # 👈 DÉMARRER ICI
-├── demo.py        # Démonstration rapide
-├── RAPPORT.md     # Documentation complète
-└── QUICKSTART.md  # Guide de démarrage
+├── ai/             # Intelligence artificielle (3 niveaux)
+├── gui/            # Interface graphique (Tkinter)
+├── interfaces/     # Abstractions (IPlayer, IEvaluator, IRenderer)
+├── scripts/        # Scripts d'analyse (benchmarks, résumés)
+├── tournaments/    # Résultats et utilitaires de tournoi
+├── tests/          # Tests unitaires (14 tests)
+├── run.py          # 👈 DÉMARRER ICI (menu interactif)
+├── run_tournament.py# lancer tournois automatisés
+├── demo.py         # Démonstration rapide
+├── docs/           # Documentation et résultats (benchmarks, rapports)
+└── QUICKSTART.md   # Guide de démarrage
 ```
 
 ---
 
 ## 🎯 Niveaux d'IA
 
-| Niveau | Algorithme | Profondeur | Nœuds | Temps |
-|--------|-----------|-----------|-------|-------|
-| **Facile** | Minimax | 2 | ~57 | 0.004s |
-| **Moyen** | Alpha-Beta | 4 | ~518 | 0.076s |
-| **Difficile** | Alpha-Beta | 5 | ~2181 | 0.338s |
+| Niveau | Algorithme | Profondeur | Évaluateur | Nœuds | Temps |
+|--------|-----------|-----------|-----------|-------|-------|
+| **Facile** | Minimax | 1 | Matériel | ~8 | 0.7ms |
+| **Moyen** | Alpha-Beta | 3 | Matériel+Mobilité | ~179 | 28ms |
+| **Difficile** | Alpha-Beta | 5 | Avancé | ~2181 | 322ms |
 
 ---
 
@@ -90,8 +105,8 @@ python demo.py
 
 ## 📚 Documentation
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Guide de démarrage rapide
-- **[RAPPORT.md](RAPPORT.md)** - Documentation technique complète
+- **[docs/QUICKSTART.md](docs/QUICKSTART.md)** - Guide de démarrage rapide
+- **[docs/RAPPORT.md](docs/RAPPORT.md)** - Documentation technique complète
 - **[tests/test_game.py](tests/test_game.py)** - Exemples d'utilisation
 
 ---
@@ -111,12 +126,12 @@ python demo.py
 
 ### Minimax (Facile)
 - Exploration exhaustive
-- Profondeur 2
-- ~57 nœuds
+- Profondeur 1
+- ~8 nœuds
 
 ### Alpha-Beta (Moyen/Difficile)
 - Élagage des branches
-- Profondeur 4-5
+- Profondeur 3-5
 - 2× plus rapide que Minimax
 - Tri des coups (captures en premier)
 
@@ -129,7 +144,7 @@ python demo.py
 
 ## 💻 Technologies
 
-- **Python 3.8+** (type hints, clean code)
+- **Python 3.11+** (type hints, clean code)
 - **Tkinter** (interface graphique built-in)
 - **pytest** (tests unitaires)
 - **Architecture SOLID** (Clean Architecture)

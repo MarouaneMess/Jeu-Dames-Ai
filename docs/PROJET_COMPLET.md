@@ -66,7 +66,7 @@
 
 ### Interfaces Graphiques
 
-- [x] **Tkinter:** Interface fonctionnelle (compatible Python 3.14)
+- [x] **Tkinter:** Interface fonctionnelle (compatible Python 3.11+)
 - [x] Sélection au clic
 - [x] Surbrillance des coups légaux
 - [x] Panneau d'informations
@@ -118,10 +118,10 @@
 ### Installation
 
 ```bash
-# Python 3.14 (Tkinter)
+# Python 3.11+ (Tkinter)
 pip install pytest
 python run.py
-
+```
 
 ### Lancement
 

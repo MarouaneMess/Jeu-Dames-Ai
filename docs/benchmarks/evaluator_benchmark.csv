@@ -1,0 +1,10 @@
+evaluator,depth,score,nodes_explored,time_seconds
+Material,1,-0.0,8,0.0007
+Material,3,-0.0,81,0.006
+Material,5,-0.0,551,0.0414
+Material+Mobility,1,0.1,8,0.0015
+Material+Mobility,3,0.7,179,0.0283
+Material+Mobility,5,0.7,2064,0.2945
+Advanced,1,0.25,8,0.0016
+Advanced,3,0.7,166,0.0266
+Advanced,5,0.7,2181,0.3225

@@ -1,308 +1,136 @@
 # 🎮 JEU DE DAMES - Rapport de Projet
 
-## 📋 Informations Générales
-
-**Projet:** Jeu de Dames avec Intelligence Artificielle  
-**Langage:** Python 3.11+  
-**Architecture:** Professionnelle (MVC + Clean Architecture)  
-**Interface:** Pygame (GUI moderne) + Tkinter (fallback)  
-
----
-
-## 🏗️ Architecture du Projet
-
-### Structure des Dossiers
-
-```
-projet/
-├── models/              # Logique métier (Domain Layer)
-│   ├── types.py        # Énumérations (Player, Piece, CellState)
-│   ├── move.py         # Représentation des coups
-│   ├── board.py        # État du plateau
-│   └── game_state.py   # Règles du jeu
-│
-├── ai/                 # Intelligence Artificielle
-│   ├── evaluators.py   # Fonctions d'évaluation (3 niveaux)
-│   ├── search.py       # Algorithmes Minimax & Alpha-Beta
-│   └── ai_player.py    # Joueur IA (Easy/Medium/Hard)
-│
-├── gui/                # Interface graphique
-│   ├── pygame_renderer.py    # Rendu Pygame professionnel
-│   └── tkinter_renderer.py   # Rendu Tkinter (fallback)
-│
-├── interfaces/         # Abstractions (SOLID - Dependency Inversion)
-│   ├── player.py       # IPlayer (humain ou IA)
-│   ├── evaluator.py    # IEvaluator (fonctions d'évaluation)
-│   └── renderer.py     # IRenderer (moteurs de rendu)
-│
-├── tests/              # Tests unitaires
-│   └── test_game.py    # 13 tests (pytest)
-│
-└── run.py              # Point d'entrée principal
-```
-
-### Principes Architecturaux
-
-✅ **Separation of Concerns** - Chaque module a une responsabilité unique  
-✅ **Dependency Inversion** - Dépendances via interfaces abstraites  
-✅ **Single Responsibility** - Une classe = une fonctionnalité  
-✅ **Open/Closed** - Extensible sans modification du code existant  
-
----
-
-## 🎯 Fonctionnalités Implémentées
-
-### 1. Moteur de Jeu Complet
-
-✅ Plateau 8×8 avec cases jouables (diagonales noires)  
-✅ 12 pièces par joueur au départ  
-✅ Déplacement correct des pions (diagonale, avant uniquement)  
-✅ Déplacement correct des dames (diagonale, toutes directions)  
-✅ **Capture obligatoire** (règle respectée)  
-✅ **Multi-capture** (séquences de sauts)  
-✅ Promotion automatique (pion → dame)  
-✅ Détection de fin de partie  
-✅ Calcul du gagnant  
-
-### 2. Intelligence Artificielle (3 Niveaux)
-
-| Niveau | Algorithme | Profondeur | Évaluation | Nœuds | Temps |
-|--------|-----------|-----------|------------|-------|-------|
-| **Facile** | Minimax | 2 | Matériel | ~50 | 0.01s |
-| **Moyen** | Alpha-Beta | 4 | Matériel + Mobilité | ~800 | 0.15s |
-| **Difficile** | Alpha-Beta | 5 | Avancé (position) | ~1500 | 0.30s |
-
-#### Évaluations Implémentées
-
-1. **MaterialEvaluator** - Pion=1, Dame=5
-2. **MobilityEvaluator** - Matériel + bonus mobilité (0.1×coups)
-3. **AdvancedEvaluator** - Matériel + Mobilité + Position
-   - Menace de promotion
-   - Défense dernière rangée
-   - Contrôle du centre
-
-### 3. Interface Graphique
-
-#### Tkinter (Fallback - Fonctionne avec Python 3.14)
-
-✅ Interface fonctionnelle  
-✅ Damier simple  
-✅ Pièces cliquables  
-✅ Affichage des coups légaux  
-
----
-
-## 🧠 Algorithmes d'IA
-
-### Minimax (Niveau Facile)
 
-```
-Principe: Exploration exhaustive de l'arbre de jeu
-- Profondeur: 2 coups
-- Complexité: O(b^d) où b=branches, d=profondeur
-- Avantage: Simple et prévisible
-- Inconvénient: Lent pour grandes profondeurs
-```
+## 5. Analyse du moteur, de l'IA et des tournois
 
-### Alpha-Beta (Niveaux Moyen et Difficile)
+### 5.1 Présentation générale du jeu
 
-```
-Principe: Minimax avec élagage des branches inutiles
-- Profondeur: 4-5 coups
-- Complexité: O(b^(d/2)) dans le meilleur cas
-- Avantage: 2x plus rapide que Minimax
-- Optimisation: Tri des coups (captures en premier)
-```
+Le projet implémente une version classique du « jeu de dames » sur un damier 8×8. Les pièces occupent uniquement les cases jouables (diagonales sombres). Chaque joueur débute avec 12 pions disposés sur les trois premières rangées de son camp.
 
-**Élagage Alpha-Beta:**
-- α (alpha): Meilleur score garanti pour MAX
-- β (beta): Meilleur score garanti pour MIN
-- Coupe si β ≤ α (branche inutile)
+Règles principales implémentées
+- Déplacement : les pions se déplacent d'une case en diagonale vers l'avant (selon leur couleur). Les dames (rois) se déplacent en diagonale et peuvent parcourir plusieurs cases (mouvement long, type « flying king »).
+- Capture : la capture est obligatoire si au moins une prise est possible. Les prises multiples (séquences de sauts) sont gérées récursivement et retournées comme coups distincts.
+- Promotion : un pion atteint la dernière rangée adverse et est automatiquement promu en dame.
+- Conditions de fin : une partie se termine lorsqu'un joueur n'a plus de pièces actives ou n'a aucun coup légal. Dans ces cas, l'adversaire est déclaré gagnant.
+- Nulle : une partie est nulle si 20 coups consécutifs sont joués sans capture , ou si les deux joueurs répètent la même position 5 fois.
 
----
+### 5.2 Implementation et validation du moteur de jeu
 
-## 📊 Tests et Validation
+Résumé des choix d'implémentation
+- Représentation de l'état: le moteur expose les classes `Board`, `Move` et `GameState` (fichiers clés: `models/board.py`, `models/move.py`, `models/game_state.py`). Le `Board` contient une grille 8×8 (`grid`), l'occupation des cases via `CellState` et le champ `current_player`.
+- Représentation d'un coup: la classe `Move` stocke un `path` (liste de positions), un ensemble `captured_positions` et des indicateurs `is_capture` / `is_promotion` selon la nature du coup.
+- Génération des coups: `GameState.generate_legal_moves()` orchestre la génération en deux étapes:
+    - Recherche de toutes les prises via `_generate_capture_moves()` et `_find_capture_sequences()`; si au moins une prise existe, seules les prises sont retournées (règle: capture obligatoire).
+    - Sinon, génération des déplacements simples via `_generate_simple_moves()` (pions: une case en diagonale selon le sens; dames: exploration des diagonales tant que la case suivante est libre).
+- Application d'un coup: `Board.apply_move(move)` met à jour la grille (déplacement de la pièce, suppression des pièces capturées, promotion si nécessaire) puis bascule `current_player`.
+- Détection des états terminaux: `GameState.is_game_over()` et `GameState.get_winner()` utilisent:
+    - l'absence de pièces ou de coups légaux pour déterminer la fin de partie;
+    - une règle de nulle basée sur un compteur de coups sans capture (implémentation accessible dans `models/game_state.py`).
 
-### Tests Unitaires (pytest)
+Validation et tests unitaires
+- Le projet inclut une suite de tests dans `tests/test_game.py` qui vérifie les aspects critiques du moteur (initialisation du plateau, génération des coups, capture obligatoire, promotion, transitions d'état, évaluateurs et algorithmes de recherche). La suite contient actuellement 14 tests unitaires et passe sur la machine de développement.
 
-```bash
-pytest tests/test_game.py -v
-```
 
-**13 tests implémentés:**
+Bonnes pratiques de test à inclure dans le rapport
+- Présenter un ou deux tests représentatifs (ex.: capture obligatoire et promotion). Coller un extrait de `tests/test_game.py` montre la correspondance directe entre règle et test.
+- Expliquer les invariants vérifiés: conservation du nombre total de pièces (après déplacement), changement de camp, non-corruption du plateau.
+- Mesurer les performances de génération (nombre de coups générés, temps) sur une position statique pour justifier les optimisations (tri des coups avant exploration, clonage minimal).
 
-1. **TestBoardSetup** (4 tests)
-   - Dimensions du plateau
-   - Comptage des pièces
-   - Position initiale des blancs
-   - Position initiale des noirs
+### 5.3 Fonctions d'evaluation, score et elagage alpha-beta
 
-2. **TestMovement** (3 tests)
-   - Déplacement des pions blancs (vers le haut)
-   - Capture obligatoire
-   - Promotion en dame
+Trois fonctions d'evaluation sont implementees. Elles retournent un score du point de vue du joueur MAX (joueur courant) :
 
-3. **TestAI** (4 tests)
-   - Évaluateur matériel
-   - Minimax trouve des coups
-   - Alpha-Beta trouve des coups
-   - Alpha-Beta < Minimax (nœuds)
+- score positif : position favorable a MAX ;
+- score negatif : position favorable a MIN ;
+- score proche de 0 : position globalement equilibree.
 
-4. **TestGameState** (3 tests)
-   - Coups légaux initiaux (7 coups)
-   - Fin de partie (plus de pièces)
-   - Calcul du gagnant
+Description des evaluateurs utilises :
 
-**Résultat:** ✅ 13/13 tests passent
+| Evaluateur | Criteres utilises | Calcul du score | Interpretation |
+|---|---|---|---|
+| Material | Valeur des pieces | somme(MAX) - somme(MIN), avec pion = 1 et dame = 5 | avantage materiel pur |
+| Material+Mobility | Materiel + mobilite | score materiel + 0.1 x (coups_MAX - coups_MIN) | avantage materiel et activite |
+| Advanced | Materiel + mobilite + position | Material+Mobility + bonus (centre, menace de promotion, defense de rangee) | avantage strategique plus fin |
 
----
+Integration dans Minimax et Alpha-Beta :
 
-## 🚀 Utilisation
+- a chaque feuille (profondeur 0) ou etat terminal, la fonction d'evaluation calcule le score ;
+- Minimax propage ce score en alternant max et min selon le joueur ;
+- Alpha-Beta applique la meme logique mais avec bornes alpha et beta pour couper des branches ;
+- le tri des coups est active avant l'exploration (captures, puis promotions), ce qui augmente l'efficacite des coupures.
 
-### Installation
+Dans la configuration du projet :
 
-```bash
+- IA facile : Minimax, profondeur 1, evaluateur Material ;
+- IA moyenne : Alpha-Beta, profondeur 3, evaluateur Material+Mobility ;
+- IA difficile : Alpha-Beta, profondeur 5, evaluateur Advanced.
 
-# Python 3.14 (utilise Tkinter automatiquement)
-pip install pytest
-```
+Analyse experimentale (plateau initial, alpha-beta, profondeurs 1, 3 et 5) :
 
-### Lancement
+| Evaluateur | Profondeur | Score | Noeuds explores | Temps (s) |
+|---|---:|---:|---:|---:|
+| Material | 1 | -0.0 | 8 | 0.0007 |
+| Material | 3 | -0.0 | 81 | 0.0060 |
+| Material | 5 | -0.0 | 551 | 0.0414 |
+| Material+Mobility | 1 | 0.1 | 8 | 0.0015 |
+| Material+Mobility | 3 | 0.7 | 179 | 0.0283 |
+| Material+Mobility | 5 | 0.7 | 2064 | 0.2945 |
+| Advanced | 1 | 0.25 | 8 | 0.0016 |
+| Advanced | 3 | 0.7 | 166 | 0.0266 |
+| Advanced | 5 | 0.7 | 2181 | 0.3225 |
 
-```bash
-# Lancer le jeu
-python run.py
+Figures (mesures selon la profondeur) :
 
-# Menu interactif:
-# 1. Humain vs IA Facile
-# 2. Humain vs IA Moyen
-# 3. Humain vs IA Difficile
-# 4. IA vs IA (Démo)
-# 5. Tests de performance
-```
+![Tableau de bord des evaluateurs](benchmarks/benchmark_dashboard.png)
 
-### Tests
+![Temps de calcul par profondeur](benchmarks/benchmark_time.png)
 
-```bash
-# Tous les tests
-pytest tests/ -v
+![Noeuds explores par profondeur](benchmarks/benchmark_nodes.png)
 
-# Tests avec coverage
-pytest tests/ --cov=models --cov=ai
-```
+![Score retourne par profondeur](benchmarks/benchmark_score.png)
 
----
+Discussion de l'interaction avec l'elagage alpha-beta :
 
-## 📈 Performance
+- Impact du tri des coups : en explorant d'abord les coups prometteurs (captures et promotions), les bornes alpha/beta se resserrent plus vite ;
+- Impact sur les noeuds explores : quand la profondeur augmente, tous les evaluateurs explorent plus de noeuds, mais la croissance est plus marquee avec des evaluateurs plus riches (car l'ordre des coups et la structure des branches changent) ;
+- Impact sur le temps : le temps suit la croissance des noeuds explores ; l'evaluateur Advanced est le plus couteux, mais apporte une evaluation strategique plus fine ;
+- Profondeur effectivement atteinte : dans cette implementation, la profondeur cible est atteinte hors arret terminal precoce, et la statistique `depth_reached` est renseignee a la profondeur demandee dans la recherche.
 
-### Benchmarks (Position Initiale)
+Conclusion 5.3 : les trois fonctions sont complementaires. Material est rapide et stable, Material+Mobility introduit un meilleur sens de l'activite, et Advanced donne le meilleur niveau strategique au prix d'un cout de calcul plus eleve. Les resultats confirment l'interet du couple "bon evaluateur + alpha-beta + tri des coups".
 
-| Configuration | Nœuds | Temps | Coups/s |
-|--------------|-------|-------|---------|
-| Minimax depth=2 | 56 | 0.007s | 8000 |
-| Alpha-Beta depth=2 | 56 | 0.005s | 11200 |
-| Alpha-Beta depth=4 | 909 | 0.204s | 4500 |
-| Alpha-Beta depth=5 | 1951 | 0.398s | 4900 |
+Le script de generation des tableaux/figures est fourni dans [scripts/benchmark_evaluators.py](scripts/benchmark_evaluators.py). Les sorties sont dans [docs/benchmarks/](docs/benchmarks/).
 
-### Optimisations Implémentées
+### 5.4 Tournoi entre les intelligences artificielles
 
-✅ **Tri des coups** - Captures → Promotions → Autres  
-✅ **Élagage Alpha-Beta** - Réduction ~50% des nœuds  
-✅ **Clone optimisé** - Copie profonde uniquement nécessaire  
-✅ **Cache d'évaluation** - (Non implémenté mais possible)  
+Le tournoi a ete organise par couples de niveaux, avec 3 lots de 50 parties pour chaque configuration. Cela represente 150 parties par couple, ce qui permet d'obtenir une mesure plus robuste que sur une seule serie de 50 parties.
 
----
+| Blanc | Noir | Lots | Victoires blanches moy. | Victoires noires moy. | Nuls moy. | Temps moyen (s) |
+|---|---|---:|---:|---:|---:|---:|
+| facile | facile | 3 | 28.0 | 22.0 | 0.0 | 0.44 |
+| facile | hard | 3 | 0.0 | 50.0 | 0.0 | 35.99 |
+| facile | moyen | 3 | 0.33 | 49.67 | 0.0 | 2.55 |
+| hard | facile | 3 | 50.0 | 0.0 | 0.0 | 26.33 |
+| hard | hard | 3 | 11.67 | 25.33 | 13.0 | 725.87 |
+| hard | moyen | 3 | 37.33 | 5.0 | 7.67 | 261.78 |
+| moyen | facile | 3 | 49.33 | 0.67 | 0.0 | 2.19 |
+| moyen | hard | 3 | 2.67 | 42.0 | 5.33 | 159.43 |
+| moyen | moyen | 3 | 21.0 | 21.0 | 8.0 | 9.41 |
 
-## 🔧 Détails Techniques
+Le graphe ci-dessous resume visuellement les victoires, defaites et nuls par couple d'IA.
 
-### Technologies
+![Tableau de bord des tournois](benchmarks/tournament_dashboard.png)
 
-- **Langage:** Python 3.11+ (type hints, match-case)
-- **GUI:** Pygame 2.6+ (ou Tkinter built-in)
-- **Tests:** pytest 7.0+
-- **Architecture:** Clean Architecture + SOLID
+Interpretation des resultats :
 
-### Dépendances
+- Robustesse des resultats. Chaque couple est evalue sur 150 parties (3 lots de 50), ce qui reduit fortement l'effet d'une serie atypique. Les tendances fortes restent stables d'un lot a l'autre : hard domine facile, moyen domine facile, et hard domine moyen dans les deux sens de confrontation.
 
-```
-pygame>=2.6.0      # Interface graphique (optionnel)
-pytest>=7.0.0      # Tests unitaires
-```
+- Influence du hasard. Le moteur introduit une part de variabilite via le choix aleatoire parmi plusieurs meilleurs coups de meme score. Cette variabilite est visible surtout dans les confrontations proches (moyen vs moyen, hard vs hard), ou la proportion de nuls augmente et ou les ecarts de victoires sont moins extremes. Le hasard influence donc le detail des scores, mais pas la hierarchie globale des niveaux.
 
-### Fichiers Clés
+- Influence du joueur qui commence. L'avantage du premier joueur existe dans certains cas, mais il n'est pas universel. Exemple en miroir : facile vs moyen (blanc facile) donne un taux de victoire blanc tres faible, alors que moyen vs facile (blanc moyen) donne un taux de victoire blanc tres eleve. Cela montre que l'effet du niveau de l'IA est plus fort que l'effet du trait (jouer en premier). Sur les duels de meme niveau (facile vs facile, moyen vs moyen, hard vs hard), on observe des ecarts plus moderes et davantage de nuls, ce qui est coherent avec des affrontements plus equilibres.
 
-```python
-# models/game_state.py - Règles du jeu
-def generate_legal_moves(self, player) -> List[Move]:
-    captures = self._generate_capture_moves(player)
-    if captures:
-        return captures  # Capture obligatoire !
-    return self._generate_simple_moves(player)
+- Justification generale. Les resultats sont coherents avec la construction des IA : profondeur de recherche plus elevee, evaluateur plus riche et alpha-beta avec tri des coups pour les niveaux superieurs. Les performances observees en tournoi confirment donc les choix algorithmiques presentes dans la section precedente.
 
-# ai/search.py - Algorithme Alpha-Beta
-def alphabeta(board, depth, alpha, beta, maximizing, evaluator, stats):
-    # Élagage si beta <= alpha
-    if beta <= alpha:
-        break  # Coupure !
-    return score, best_move
+Ces resultats montrent que l'augmentation du niveau d'IA produit bien une difference tangible de performance. Ils montrent aussi que les configurations symetriques ne donnent pas toujours des resultats parfaitement equilibres, ce qui justifie de travailler par lots de parties et d'agréger les statistiques.
 
-# gui/pygame_renderer.py - Rendu graphique
-def render(self, board: Board):
-    self._draw_board()
-    self._draw_pieces(board)
-    self._draw_highlights()
-    pygame.display.flip()
-```
+Le fichier de synthese est genere a partir de [tournaments/tournament_summary.csv](tournaments/tournament_summary.csv) via le script [scripts/summarize_tournaments.py](scripts/summarize_tournaments.py). Le resume produit est stocke dans [docs/benchmarks/tournament_summary.md](docs/benchmarks/tournament_summary.md).
 
----
-
-## ✨ Points Forts du Projet
-
-### Architecture
-
-✅ **Séparation claire** entre logique métier, IA et interface  
-✅ **Interfaces abstraites** permettant l'extensibilité  
-✅ **Pas de couplage fort** entre les modules  
-✅ **Tests unitaires** couvrant les fonctionnalités critiques  
-
-### Code Quality
-
-✅ **Type hints** sur toutes les fonctions  
-✅ **Docstrings** en français, claires et concises  
-✅ **Nommage explicite** (pas d'abréviations ambiguës)  
-✅ **Commentaires pertinents** sur la logique complexe  
-
-### IA
-
-✅ **3 niveaux distincts** avec différences visibles  
-✅ **Algorithmes classiques** correctement implémentés  
-✅ **Optimisations réelles** (Alpha-Beta, tri des coups)  
-✅ **Statistiques détaillées** (nœuds, temps)  
-
-### Interface
-
-✅ **Pygame professionnel** avec graphismes soignés  
-✅ **Fallback Tkinter** garantissant compatibilité  
-✅ **UX intuitive** (clic pour sélectionner/jouer)  
-✅ **Feedback visuel** (surbrillance, coups légaux)  
-
----
-
-## 📝 Conclusion
-
-Ce projet démontre une **maîtrise complète** des concepts suivants:
-
-- ✅ Architecture logicielle professionnelle
-- ✅ Algorithmes de recherche en IA (Minimax, Alpha-Beta)
-- ✅ Programmation orientée objet (SOLID)
-- ✅ Interfaces graphiques (Pygame)
-- ✅ Tests unitaires (pytest)
-- ✅ Documentation technique
-
-Le code est **propre, testable, maintenable et extensible**.
-
----
-
-**Auteur:** Projet L3 S2 AI  
-**Date:** Février 2026  
-**Version:** 2.0

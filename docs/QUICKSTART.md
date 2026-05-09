@@ -2,7 +2,7 @@
 
 ## Installation Rapide
 
-### Option 2: Python 3.14 (Tkinter automatique)
+### Python 3.11+ (Tkinter automatique)
 
 ```bash
 # 1. Installer pytest 
@@ -22,12 +22,21 @@ python run.py
 python run.py
 ```
 
-**Options disponibles:**
+**Options disponibles (menu principal):**
 1. **Humain vs IA Facile** - Jouez contre une IA simple
 2. **Humain vs IA Moyen** - IA plus forte avec Alpha-Beta
 3. **Humain vs IA Difficile** - IA experte avec évaluation avancée
-4. **IA vs IA (Démo)** - Regardez deux IA jouer
-5. **Tests de performance** - Benchmarks des algorithmes
+
+4. **IA Facile vs IA Facile**
+5. **IA Moyen vs IA Moyen**
+6. **IA Difficile vs IA Difficile**
+
+7. **IA Facile vs IA Moyen**
+8. **IA Facile vs IA Difficile**
+9. **IA Moyen vs IA Difficile**
+
+10. **Tests de performance** - Benchmarks des algorithmes
+11. **Quitter**
 
 ### Interface Graphique
 
@@ -44,7 +53,7 @@ pytest tests/ -v
 pytest tests/test_game.py -v
 
 
-**Résultat attendu:** 13 tests passent ✅
+**Résultat attendu:** 14 tests passent ✅
 
 ---
 
@@ -56,7 +65,7 @@ projet/
 ├── ai/            # Intelligence artificielle (3 niveaux)
 ├── gui/           # Interface graphique (Pygame + Tkinter)
 ├── interfaces/    # Abstractions (IPlayer, IEvaluator, IRenderer)
-├── tests/         # Tests unitaires (13 tests)
+├── tests/         # Tests unitaires (14 tests)
 ├── run.py         # Point d'entrée principal 👈 DÉMARRER ICI
 └── RAPPORT.md     # Documentation complète
 ```
@@ -97,9 +106,10 @@ pytest tests/ -v
 tree /F                    # Windows
 find . -name "*.py"        # Linux/Mac
 
-# Performance IA
+# Performance IA (via le menu)
+# Lancer le jeu et choisir l'option 10 dans le menu principal
 python run.py
-# Puis choisir option 5
+# Puis choisir option 10
 ```
 
 
