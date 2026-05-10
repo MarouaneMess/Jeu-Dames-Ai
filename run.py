@@ -73,7 +73,7 @@ def play_game(white_player: IPlayer, black_player: IPlayer, renderer=None, silen
             print(f"Coup choisi: {move}")
 
         # Appliquer le coup
-        board.apply_move(move)
+        game_state.apply_move(move)
         
         # Vérifier la règle des 20 coups sans capture (nul)
         if game_state.is_draw_by_twenty_moves():
