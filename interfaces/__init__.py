@@ -1,6 +1,5 @@
 """
 Interfaces abstraites pour le jeu de Dames
-Architecture SOLID - Inversion de dépendances
 """
 
 from .player import IPlayer

@@ -38,5 +38,3 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Projet
-tournament_results.csv

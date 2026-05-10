@@ -3,8 +3,6 @@
 Le script regroupe les parties par couple de niveaux et calcule les moyennes,
 les taux de victoire et le temps moyen.
 
-Usage:
-    python scripts/summarize_tournaments.py
 """
 
 from __future__ import annotations

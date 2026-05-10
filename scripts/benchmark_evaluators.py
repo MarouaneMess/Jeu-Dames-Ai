@@ -3,8 +3,6 @@
 Le script mesure, pour le plateau initial, le score, le temps et le nombre
 de noeuds explores pour chaque evaluateur et pour plusieurs profondeurs.
 
-Usage:
-    python scripts/benchmark_evaluators.py
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-# 🎮 Jeu de Dames avec IA - Architecture Professionnelle
+# 🎮 Jeu de Dames avec IA 
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![Tests](https://img.shields.io/badge/Tests-14%2F14-success)
@@ -11,8 +11,6 @@
 # Lancer le jeu
 python run.py
 
-# Tests
-pytest tests/ -v
 ```
 Exemples utiles:
 
@@ -23,11 +21,9 @@ python scripts/benchmark_evaluators.py
 # Résumer les tournois et générer le tableau de bord
 python scripts/summarize_tournaments.py
 
-# Lancer un tournoi automatisé (script dédié)
+# Lancer un tournoi automatisé (génére résultats sous tournaments/)
 python run_tournament.py
 ```
-
-**👉 Voir [docs/QUICKSTART.md](docs/QUICKSTART.md) pour le guide complet**
 
 ---
 
@@ -45,32 +41,21 @@ Un jeu de Dames complet avec:
 ## 🏗️ Architecture
 
 ```
-projet/
-├── models/         # Logique métier (Board, Move, GameState)
-├── ai/             # Intelligence artificielle (3 niveaux)
-├── gui/            # Interface graphique (Tkinter)
-├── interfaces/     # Abstractions (IPlayer, IEvaluator, IRenderer)
-├── scripts/        # Scripts d'analyse (benchmarks, résumés)
-├── tournaments/    # Résultats et utilitaires de tournoi
-├── tests/          # Tests unitaires (14 tests)
-├── run.py          # 👈 DÉMARRER ICI (menu interactif)
-├── run_tournament.py# lancer tournois automatisés
-├── demo.py         # Démonstration rapide
-├── docs/           # Documentation et résultats (benchmarks, rapports)
-└── QUICKSTART.md   # Guide de démarrage
+Jeu-Dames-Ai/
+├── models/          # Logique métier (Board, Move, GameState)
+├── ai/              # Intelligence artificielle (Minimax, Alpha-Beta)
+├── gui/             # Interface graphique (Tkinter)
+├── interfaces/      # Abstractions (IPlayer, IEvaluator, IRenderer)
+├── scripts/         # Scripts d'analyse (benchmarks, résumés)
+├── tournaments/     # Résultats et utilitaires de tournoi
+├── tests/           # Tests unitaires (14 tests)
+├── docs/            # Documentation et résultats (benchmarks, rapports)
+├── run.py           # 👈 DÉMARRER ICI (menu interactif)
+└── run_tournament.py # Lancer tournois automatisés
 ```
 
 ---
 
-## 🎯 Niveaux d'IA
-
-| Niveau | Algorithme | Profondeur | Évaluateur | Nœuds | Temps |
-|--------|-----------|-----------|-----------|-------|-------|
-| **Facile** | Minimax | 1 | Matériel | ~8 | 0.7ms |
-| **Moyen** | Alpha-Beta | 3 | Matériel+Mobilité | ~179 | 28ms |
-| **Difficile** | Alpha-Beta | 5 | Avancé | ~2181 | 322ms |
-
----
 
 ## 🖼️ Interface Graphique
 
@@ -89,11 +74,9 @@ projet/
 
 ```bash
 # Lancer les tests
-pytest tests/ -v
-
-# Démonstration
-python demo.py
+python tests/test_game.py
 ```
+
 
 **14 tests unitaires:**
 - Setup du plateau (4)
@@ -105,9 +88,8 @@ python demo.py
 
 ## 📚 Documentation
 
-- **[docs/QUICKSTART.md](docs/QUICKSTART.md)** - Guide de démarrage rapide
-- **[docs/RAPPORT.md](docs/RAPPORT.md)** - Documentation technique complète
-- **[tests/test_game.py](tests/test_game.py)** - Exemples d'utilisation
+- **[docs/rapport](docs/rapport)** - Rapport complet
+- **[tests/test_game.py](tests/test_game.py)** - Tests unitaires
 
 ---
 
@@ -149,26 +131,16 @@ python demo.py
 - **pytest** (tests unitaires)
 - **Architecture SOLID** (Clean Architecture)
 
----
-
-## 🏆 Points Forts
-
-✅ **Architecture professionnelle** - Séparation models/ai/gui/interfaces  
-✅ **Code propre** - Type hints, docstrings, nommage clair  
-✅ **Tests complets** - 14 tests unitaires, 100% pass  
-✅ **IA performante** - Alpha-Beta avec optimisations  
-✅ **Interface simple** - Tkinter, aucune dépendance externe  
-✅ **Extensible** - Interfaces abstraites, Open/Closed principle  
 
 ---
 
-## � Conclusion
+##  Conclusion
 
 Ce projet démontre une **maîtrise complète** des concepts suivants:
 
 - ✅ Architecture logicielle professionnelle
 - ✅ Algorithmes de recherche en IA (Minimax, Alpha-Beta)
-- ✅ Programmation orientée objet (SOLID)
+- ✅ Programmation orientée objet 
 - ✅ Interfaces graphiques (Tkinter)
 - ✅ Tests unitaires (pytest)
 - ✅ Documentation technique
@@ -177,6 +149,6 @@ Le code est **propre, testable, maintenable et extensible**.
 
 ---
 
-**Auteur:** Projet L3 S2 AI  
-**Date:** Février 2026  
-**Version:** 2.0 
+**Auteurs:** Messafri Marouane / Nekiche Adel  
+**Date:** Mai 2026  
+**Version:** 1.0 

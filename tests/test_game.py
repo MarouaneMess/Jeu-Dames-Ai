@@ -1,6 +1,5 @@
 """
 Tests unitaires pour le jeu de Dames
-Architecture professionnelle avec pytest
 """
 
 import sys
