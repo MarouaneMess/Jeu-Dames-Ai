@@ -160,7 +160,7 @@ def performance_tests():
     tests = [
         ("Facile (Minimax, profondeur 1)",1,MaterialEvaluator(), False),
         ("Moyen (Alpha-Beta, profondeur 3)",3,MobilityEvaluator(), True),
-        ("Difficile (Alpha-Beta, profondeur 5)",5,MobilityEvaluator(), True),
+        ("Difficile (Alpha-Beta, profondeur 5)",5,AdvancedEvaluator(), True),
     ]
     for name, depth, evaluator, use_ab in tests:
         print(f"\n{name} :")
